@@ -40,7 +40,8 @@ public class Main {
                                 "    p XXX list    List of all pages for process, where XXX is process id\n" +
                                 "    p XXX new     Add new page for process, where XXX is process id\n" +
                                 "    p XXX YYY     Get page for process and load it to memory\n" +
-                                "    m             List of current memory state\n"
+                                "    m             List of current memory state\n" +
+                                "    q             To exit\n"
                 );
             }
             else if (command.startsWith("p")) {
