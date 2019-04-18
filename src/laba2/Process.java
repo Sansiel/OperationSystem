@@ -25,7 +25,7 @@ public class Process implements Comparable<Process>{
 
 
     public boolean isFinished() {
-        //проверка на завершённость. Используется в OperationSystem
+        //проверка на завершённость. Используется в OperatingSystem
         for (Thread thread : this.threads) {
             if (!thread.isFinished()) {
                 return false;
@@ -63,7 +63,7 @@ public class Process implements Comparable<Process>{
 //        }
 //
 //        //oneThreadTime для первого отображения в консоле до изменения времени работы
-//        int oneThreadTime = OperationSystem.QUANT / aliveThreadsCount;
+//        int oneThreadTime = OperatingSystem.QUANT / aliveThreadsCount;
 //        for (Thread thread : this.threads) {
 //            if (!thread.isFinished()) {
 //                for (int t = 0; t < oneThreadTime; t++) {
@@ -74,7 +74,7 @@ public class Process implements Comparable<Process>{
 //        }
 //
 //        //вывод в консоль каждую residueTime, который от 2 до 0
-//        int residueTime = OperationSystem.QUANT % aliveThreadsCount;
+//        int residueTime = OperatingSystem.QUANT % aliveThreadsCount;
 //        while (residueTime > 0) {
 //            for (Thread thread : this.threads) {
 //                if (!thread.isFinished() && residueTime > 0) {
