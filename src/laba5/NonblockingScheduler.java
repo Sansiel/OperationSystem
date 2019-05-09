@@ -42,9 +42,11 @@ public class NonblockingScheduler implements Scheduler {
 
                 curIO = new IoOperation(rnd.nextInt(10) + 5, curP.getId());
 
-                while(!curIO.isFinished())
+                while(!curIO.isFinished()) {
                     printLog("IO operation for process " + curIO.getProcessId() + " takes " + curIO.getTimeLeft() + " ms");
-                printLog("IO operation for process " + curIO.getProcessId() + " is finished");
+                    counter++;
+                }
+                    printLog("IO operation for process " + curIO.getProcessId() + " is finished");
             }
             if (curP.getQuantum() == 0 && curP.getRemainingTime() > 0) {
                 curP.setQuantum(QUANTUM);
@@ -60,10 +62,10 @@ public class NonblockingScheduler implements Scheduler {
 
     private void printLog(String s){
         if (previousPrintCounter != counter){
-            System.out.printf("%4d: %s\n", counter, s);
+            System.out.printf("%3d: %s\n", counter, s);
             previousPrintCounter = counter;
         } else {
-            System.out.printf("      %s\n", s);
+            System.out.printf("     %s\n", s);
         }
     }
 }
