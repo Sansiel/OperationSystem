@@ -2,26 +2,30 @@ package laba6;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
 
 public class CheckingScheduler {
 
     private ArrayDeque<Process> processList;
-    private HashMap<Integer, Process> blocked;
+    private ArrayList<Resource> resourcesList;
+    private ArrayList<ArrayDeque<Process>> blocked;
     private int counter;
     private int previousPrintCounter;
     public static int QUANTUM = 10;
 
     private Random rnd;
 
-    public CheckingScheduler(ArrayList<Process> processList) {
+    public CheckingScheduler(ArrayList<Resource> resourcesList, ArrayList<Process> processList) {
         processList.forEach((p) -> {
             p.setRemainingTime(p.getExecutingTime());
             p.setQuantum(QUANTUM);
         });
         this.processList = new ArrayDeque<>(processList);
-        blocked = new HashMap<>();
+        this.resourcesList = resourcesList;
+        blocked = new ArrayList<>();
+        for (int i = 0; i < resourcesList.size(); i++) {
+            blocked.add(new ArrayDeque<>());
+        }
         rnd = new Random();
         counter = 0;
         previousPrintCounter = 1;
@@ -33,52 +37,61 @@ public class CheckingScheduler {
 
     public void schedule() {
         Process curP = processList.removeFirst();
-        IoOperation curIO = null;
-        while (!processList.isEmpty() || !blocked.isEmpty() || curP != null) {
-            if (curP != null) {
-                try {
-                    printLog("exec process " + curP.getId() + ", remaining time: " + curP.getRemainingTime() + " ms, quantum: " + curP.getQuantum() + " ms");
-                    curP.exec();
+        while (!processList.isEmpty() || blocked.stream().anyMatch(e -> !e.isEmpty()) || curP != null) {
 
-                    if (curP.getQuantum() == 0 && curP.getRemainingTime() > 0) {
-                        curP.setQuantum(QUANTUM);
-                        processList.offerLast(curP);
-                        curP = processList.pollFirst();
-                    } else if (curP.getRemainingTime() == 0) {
-                        printLog("process " + curP + " is finished");
-                        curP = processList.pollFirst();
-                    }
+            if (curP == null) break; // Something went wrong
+            
+            try {
 
-                } catch (IOInterrupt ioInterrupt) {
-                    printLog("process " + curP + " request IO operation");
+                curP.exec();
 
-                    ioOperationsList.offerLast(new IoOperation(rnd.nextInt(10) + 5, curP.getId()));
+                FreeResourcesCheck();
 
-                    blocked.put(curP.getId(), curP);
-                    printLog("process " + curP + " is blocked");
+                if (curP.getQuantum() == 0 && curP.getRemainingTime() > 0) {
 
+                    curP.setQuantum(QUANTUM);
+                    processList.offerLast(curP);
                     curP = processList.pollFirst();
-                    printLog("change current process to " + curP);
+
+                } else if (curP.getRemainingTime() == 0) {
+
+                    printLog("process " + curP + " is finished");
+                    curP = processList.pollFirst();
+
                 }
 
-
-            }
-
-            if (curIO == null && !ioOperationsList.isEmpty()) {
-                curIO = ioOperationsList.pollFirst();
-            }
-
-            if (curIO != null) {
-                printLog("IO operation for process " + curIO.getProcessId() + " takes " + curIO.getTimeLeft() + " ms");
-                if (curIO.isFinished()) {
-                    printLog("IO operation for process " + curIO.getProcessId() + " is finished");
-                    processList.offerFirst(blocked.remove(curIO.getProcessId()));
-                    if (curP == null) curP = processList.pollFirst();
-                    curIO = ioOperationsList.pollFirst();
+            } catch (ResourceRequest resourceRequest) {
+                if (curP.requested.isBorrowed()) {
+                    if (DeadLockCheck(curP, curP.requested)) {
+                        // Deadlock!
+                    } else {
+                        blocked.get(curP.requested.getId()).offerLast(curP);
+                        curP = processList.pollFirst();
+                    }
+                } else {
+                    borrow(curP, curP.requested);
                 }
             }
 
             counter++;
+        }
+    }
+
+    private void borrow(Process p, Resource r) {
+        r.setBorrowingProcess(p);
+        r.setBorrowed(true);
+        r.setTimeLeft(p.requestedResourceUsageTime);
+        p.borrowed.add(r);
+    }
+
+    private void FreeResourcesCheck() {
+        for (int i = 0; i < resourcesList.size(); i++) {
+            Resource r = resourcesList.get(i);
+            Process p;
+            if (!r.isBorrowed() && (p = blocked.get(i).pollFirst()) != null) {
+                borrow(p, r);
+                processList.offerFirst(p);
+            }
         }
     }
 

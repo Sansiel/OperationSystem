@@ -49,13 +49,13 @@ public class Process {
     }
 
     public void exec() throws ResourceRequest {
-        if (rnd.nextInt(15) < 1)
+        if (remainingTime > 1 && rnd.nextInt(15) < 1)
         {
             ArrayList<Resource> notBorrowedResources = (ArrayList<Resource>) allResources.stream()
                     .filter(e -> e.getBorrowingProcess().getId() != id)
                     .collect(Collectors.toList());
             requested = notBorrowedResources.get(rnd.nextInt(notBorrowedResources.size()));
-            requestedResourceUsageTime = rnd.nextInt(7) + 1;
+            requestedResourceUsageTime = rnd.nextInt(remainingTime - 1) + 1;
             throw new ResourceRequest();
         }
         remainingTime -= 1;
