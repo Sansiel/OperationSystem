@@ -41,4 +41,9 @@ public class Resource {
     public boolean isFinished() {
         return --timeLeft == 0;
     }
+
+    @Override
+    public String toString() {
+        return "" + id;
+    }
 }

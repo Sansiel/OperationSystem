@@ -3,10 +3,12 @@ package laba6;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.stream.Collectors;
 
-public class CheckingScheduler {
+public class Scheduler {
 
     private ArrayDeque<Process> processList;
+    private ArrayList<Process> allProcessList;
     private ArrayList<Resource> resourcesList;
     private ArrayList<ArrayDeque<Process>> blocked;
     private int counter;
@@ -15,12 +17,13 @@ public class CheckingScheduler {
 
     private Random rnd;
 
-    public CheckingScheduler(ArrayList<Resource> resourcesList, ArrayList<Process> processList) {
+    public Scheduler(ArrayList<Resource> resourcesList, ArrayList<Process> processList) {
         processList.forEach((p) -> {
             p.setRemainingTime(p.getExecutingTime());
             p.setQuantum(QUANTUM);
         });
         this.processList = new ArrayDeque<>(processList);
+        this.allProcessList = processList;
         this.resourcesList = resourcesList;
         blocked = new ArrayList<>();
         for (int i = 0; i < resourcesList.size(); i++) {
@@ -40,9 +43,11 @@ public class CheckingScheduler {
         while (!processList.isEmpty() || blocked.stream().anyMatch(e -> !e.isEmpty()) || curP != null) {
 
             if (curP == null) break; // Something went wrong
-            
-            try {
 
+            try {
+                printLog("Process " + curP +
+                        ", time left: " + curP.getRemainingTime() +
+                        " ms, quantum: " + curP.getQuantum() + " ms");
                 curP.exec();
 
                 FreeResourcesCheck();
@@ -52,10 +57,11 @@ public class CheckingScheduler {
                     curP.setQuantum(QUANTUM);
                     processList.offerLast(curP);
                     curP = processList.pollFirst();
+                    printLog("Process changed to " + curP);
 
                 } else if (curP.getRemainingTime() == 0) {
 
-                    printLog("process " + curP + " is finished");
+                    printLog("Process " + curP + " is finished");
                     curP = processList.pollFirst();
 
                 }
@@ -63,9 +69,25 @@ public class CheckingScheduler {
             } catch (ResourceRequest resourceRequest) {
                 if (curP.requested.isBorrowed()) {
                     if (DeadLockCheck(curP, curP.requested)) {
-                        // Deadlock!
+                        printLog("Process " + curP +
+                                ": Denied access to resource " + curP.requested);
+                        for (Process p : allProcessList) {
+                            if (p.borrowed.size() == 0) {
+                                printLog("Process " + p + " have no borrowed resources");
+
+                            } else {
+                                printLog("Process " + p + " borrowing resources: " +
+                                        String.join(", ", p.borrowed.stream()
+                                                .map(r -> r.toString() + " for " + r.getTimeLeft() + " ms")
+                                                .collect(Collectors.toList())
+                                        )
+                                );
+                            }
+                            if (p.requested != null) printLog("  and requested " + p.requested);
+                        }
                     } else {
                         blocked.get(curP.requested.getId()).offerLast(curP);
+                        printLog("Process " + curP + ": Blocked");
                         curP = processList.pollFirst();
                     }
                 } else {
@@ -78,9 +100,13 @@ public class CheckingScheduler {
     }
 
     private void borrow(Process p, Resource r) {
+        printLog("Process " + p +
+                " borrowing resource " + r +
+                " for " + p.requestedResourceUsageTime + " ms");
         r.setBorrowingProcess(p);
         r.setBorrowed(true);
         r.setTimeLeft(p.requestedResourceUsageTime);
+        p.requested = null;
         p.borrowed.add(r);
     }
 

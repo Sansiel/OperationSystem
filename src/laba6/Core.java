@@ -23,5 +23,8 @@ public class Core {
             processes.add(p);
             System.out.printf("Process: %d, executing time: %d\n", p.getId(), p.getExecutingTime());
         }
+
+        Scheduler s = new Scheduler(resources, processes);
+        s.schedule();
     }
 }

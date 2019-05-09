@@ -11,7 +11,7 @@ public class Process {
     private int remainingTime;
     private Random rnd;
     private int quantum;
-    public HashSet<Resource> borrowed;
+    public ArrayList<Resource> borrowed;
     public Resource requested;
     public int requestedResourceUsageTime;
     public ArrayList<Resource> allResources;
@@ -21,7 +21,7 @@ public class Process {
         this.executingTime = executingTime;
         this.rnd = rnd;
         this.allResources = allResources;
-        borrowed = new HashSet<>();
+        borrowed = new ArrayList<>();
     }
 
     public int getRemainingTime() {
@@ -49,24 +49,27 @@ public class Process {
     }
 
     public void exec() throws ResourceRequest {
-        if (remainingTime > 1 && rnd.nextInt(15) < 1)
+        if (remainingTime > 1 && rnd.nextInt(5) < 1)
         {
             ArrayList<Resource> notBorrowedResources = (ArrayList<Resource>) allResources.stream()
-                    .filter(e -> e.getBorrowingProcess().getId() != id)
+                    .filter(e -> e.getBorrowingProcess() == null || e.getBorrowingProcess().getId() != id)
                     .collect(Collectors.toList());
-            requested = notBorrowedResources.get(rnd.nextInt(notBorrowedResources.size()));
-            requestedResourceUsageTime = rnd.nextInt(remainingTime - 1) + 1;
-            throw new ResourceRequest();
+            if (notBorrowedResources.size() > 0) {
+                requested = notBorrowedResources.get(rnd.nextInt(notBorrowedResources.size()));
+                requestedResourceUsageTime = rnd.nextInt(remainingTime - 1) + 1;
+                throw new ResourceRequest();
+            }
         }
         remainingTime -= 1;
         quantum -= 1;
-        borrowed.forEach(e -> {
-            if (e.isFinished()) {
-                borrowed.remove(e);
-                e.setBorrowed(false);
-                e.setBorrowingProcess(null);
+        for (int i = borrowed.size() - 1; i >= 0; i--) {
+            Resource r = borrowed.get(i);
+            if (r.isFinished()) {
+                r.setBorrowed(false);
+                r.setBorrowingProcess(null);
+                borrowed.remove(r);
             }
-        });
+        }
     }
 
     @Override
