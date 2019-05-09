@@ -18,8 +18,8 @@ public class Core {
         bs.schedule();
         int bsTime = bs.getCounter();
 
-//        NonblockingScheduler ns = new NonblockingScheduler(processes);
-//        ns.schedule();
-//        int nsTime = ns.getCounter();
+        NonblockingScheduler ns = new NonblockingScheduler(processes);
+        ns.schedule();
+        int nsTime = ns.getCounter();
     }
 }
