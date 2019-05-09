@@ -68,23 +68,24 @@ public class Scheduler {
 
             } catch (ResourceRequest resourceRequest) {
                 if (curP.requested.isBorrowed()) {
+                    for (Process p : allProcessList) {
+                        if (p.borrowed.size() == 0) {
+                            printLog("Process " + p + " have no borrowed resources");
+
+                        } else {
+                            printLog("Process " + p + " borrowing resources: " +
+                                    String.join(", ", p.borrowed.stream()
+                                            .map(r -> r.toString() + " for " + r.getTimeLeft() + " ms")
+                                            .collect(Collectors.toList())
+                                    )
+                            );
+                        }
+                        if (p.requested != null) printLog("  and requested " + p.requested);
+                    }
                     if (DeadLockCheck(curP, curP.requested)) {
                         printLog("Process " + curP +
                                 ": Denied access to resource " + curP.requested);
-                        for (Process p : allProcessList) {
-                            if (p.borrowed.size() == 0) {
-                                printLog("Process " + p + " have no borrowed resources");
-
-                            } else {
-                                printLog("Process " + p + " borrowing resources: " +
-                                        String.join(", ", p.borrowed.stream()
-                                                .map(r -> r.toString() + " for " + r.getTimeLeft() + " ms")
-                                                .collect(Collectors.toList())
-                                        )
-                                );
-                            }
-                            if (p.requested != null) printLog("  and requested " + p.requested);
-                        }
+                        curP.requested = null;
                     } else {
                         blocked.get(curP.requested.getId()).offerLast(curP);
                         printLog("Process " + curP + ": Blocked");
