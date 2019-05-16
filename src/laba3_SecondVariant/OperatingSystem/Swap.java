@@ -2,23 +2,25 @@ package laba3_SecondVariant.OperatingSystem;
 
 import java.util.ArrayList;
 
-public class Swap {
-    private ArrayList<Page> pages;
+public class Swap  {
 
-    public Swap() {
-        this.pages = new ArrayList<>();
+    private ArrayList<Page> listPageSwapping = new ArrayList<>();
+
+    public void setListPage(ArrayList<Page> listPage) {
+        this.listPageSwapping = listPage;
     }
 
-    public int getPagesCount() {
-        return pages.size();
+    public int add(Page page) {
+        listPageSwapping.add(page);
+        return listPageSwapping.indexOf(page);
     }
 
-    public int addPage(Page page) {
-        this.pages.add(page);
-        return this.pages.indexOf(page);
+    public Page getPage(int i) {
+        return listPageSwapping.get(i);
     }
 
-    public Page getPage(int pageId) {
-        return this.pages.get(pageId);
+    public String writeSwap() {
+        return "Страниц на диске : " + listPageSwapping.size() + '\n';
     }
+
 }
