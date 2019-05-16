@@ -1,4 +1,8 @@
-package laba3_SecondVariant.OperatingSystem;
+package laba3_SecondVariant.OperatingSystem.MemoryManager;
+
+import laba3_SecondVariant.OperatingSystem.*;
+import laba3_SecondVariant.OperatingSystem.Process;
+import laba3_SecondVariant.OperatingSystem.Thread;
 
 import java.util.ArrayList;
 import java.util.Random;

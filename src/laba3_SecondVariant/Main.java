@@ -1,7 +1,7 @@
 package laba3_SecondVariant;
 
 import laba3_SecondVariant.OperatingSystem.Process;
-import laba3_SecondVariant.OperatingSystem.MemoryManager;
+import laba3_SecondVariant.OperatingSystem.MemoryManager.MemoryManager;
 
 import java.util.ArrayList;
 
