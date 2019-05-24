@@ -105,66 +105,30 @@ public class MemoryManager {
         sb.append(numNewPage);
         sb.append(" страницу.\n");
         if (!tablePage.getRecord(numNewPage).isPresence()) {
-            int sp = physMemory.getSpacePage();
-            if (sp != -1) {
-                physMemory.addPage(sp, tablePage.getRecord(numNewPage).getPage());
-                tablePage.getRecord(numNewPage).setPresence(true);
-                tablePage.getRecord(numNewPage).setIdPhysMemory(sp);
-                tablePage.getRecord(numNewPage).setRecours(true);
-            } else {
-                ArrayList<ArrayList<TablePageRecord>> classes = new ArrayList<>();
-                classes.add(new ArrayList<TablePageRecord>());
-                classes.add(new ArrayList<TablePageRecord>());
-                classes.add(new ArrayList<TablePageRecord>());
-                classes.add(new ArrayList<TablePageRecord>());
-//                ArrayList<TablePageRecord> class1 = new ArrayList<TablePageRecord>();
-//                ArrayList<TablePageRecord> class2 = new ArrayList<TablePageRecord>();
-//                ArrayList<TablePageRecord> class3 = new ArrayList<TablePageRecord>();
-                for (int i = 0; i < physMemory.getArrayPage().length; i++) {
-                    /*if (!tablePage.getRecord(physMemory.getArrayPage()[i].getId()).isModifications()
-                            && !tablePage.getRecord(physMemory.getArrayPage()[i].getId()).isRecours()) {
-                        class0.add(tablePage.getRecord(physMemory.getArrayPage()[i].getId()));
-                    }
-                    if (tablePage.getRecord(physMemory.getArrayPage()[i].getId()).isModifications()
-                            && !tablePage.getRecord(physMemory.getArrayPage()[i].getId()).isRecours()) {
-                        class1.add(tablePage.getRecord(physMemory.getArrayPage()[i].getId()));
-                    }
-                    if (!tablePage.getRecord(physMemory.getArrayPage()[i].getId()).isModifications()
-                            && tablePage.getRecord(physMemory.getArrayPage()[i].getId()).isRecours()) {
-                        class2.add(tablePage.getRecord(physMemory.getArrayPage()[i].getId()));
-                    }
-                    if (tablePage.getRecord(physMemory.getArrayPage()[i].getId()).isModifications()
-                            && tablePage.getRecord(physMemory.getArrayPage()[i].getId()).isRecours()) {
-                        class3.add(tablePage.getRecord(physMemory.getArrayPage()[i].getId()));
-                    }*/
-                    TablePageRecord tablePageRecord = tablePage.getRecord(physMemory.getArrayPage()[i].getId());
-                    classes.get(Classify(tablePageRecord)).add(tablePageRecord);
-                }
-                TablePageRecord tpr;
-                if (!classes.get(0).isEmpty()) {
-                    tpr = tablePage.getRecord(classes.get(0).get(0).getPage().getId());
-                } else if (!classes.get(1).isEmpty()) {
-                    tpr = tablePage.getRecord(classes.get(1).get(0).getPage().getId());
-                } else if (!classes.get(2).isEmpty()) {
-                    tpr = tablePage.getRecord(classes.get(2).get(0).getPage().getId());
-                } else {
-                    tpr = tablePage.getRecord(classes.get(3).get(0).getPage().getId());
-                }
-                if (tpr.getIdSwap() != -1) {
-                    physMemory.addPage(tpr.getIdPhisMemory(), swap.getPage(tpr.getIdSwap()));
-                } else {
-                    physMemory.addPage(tpr.getIdPhisMemory(), tablePage.getRecord(numNewPage).getPage());
-                }
-                tablePage.getRecord(numNewPage).setPresence(true);
-                tablePage.getRecord(numNewPage).setIdPhysMemory(tpr.getIdPhisMemory());
-                tablePage.getRecord(numNewPage).setRecours(true);
-                tpr.setIdSwap(swap.add(tpr.getPage()));
-                tpr.setPresence(false);
-                tpr.setIdPhysMemory(-1);
-            }
+            addPage(numNewPage);
+
         } else {
             tablePage.getRecord(numNewPage).setRecours(true);
         }
+        currentDiskSpace(sb);
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    private void addPage(int numNewPage){
+        int sp = physMemory.getSpacePage();
+        if (sp != -1) {
+            physMemory.addPage(sp, tablePage.getRecord(numNewPage).getPage());
+            tablePage.getRecord(numNewPage).setPresence(true);
+            tablePage.getRecord(numNewPage).setIdPhysMemory(sp);
+            tablePage.getRecord(numNewPage).setRecours(true);
+        } else {
+            replace(numNewPage);
+        }
+        return;
+    }
+
+    private void currentDiskSpace(StringBuilder sb){
         sb.append("\nТекущее состояние физической памяти: \n");
         sb.append(swap.writeSwap());
         for (int i = 0; i < physMemory.getArrayPage().length; i++) {
@@ -180,8 +144,6 @@ public class MemoryManager {
                 sb.append(";\n");
             }
         }
-        sb.append("\n");
-        return sb.toString();
     }
 
     private void nullFlags() {
@@ -190,12 +152,44 @@ public class MemoryManager {
         }
     }
 
-    private int Classify (TablePageRecord r){
+    private int classify(TablePageRecord r) {
         int counter = 0;
-
-        if (r.isModifications()) counter+=1;
-        if (r.isRecours()) counter+=2;
+        if (r.isModifications()) counter += 1;
+        if (r.isRecours()) counter += 2;
         return counter;
 
+    }
+
+    private void replace(int numNewPage) {
+
+        ArrayList<ArrayList<TablePageRecord>> classes = new ArrayList<>();
+        for (int i=0;i<4;i++) {classes.add(new ArrayList<TablePageRecord>());}
+        for (int i = 0; i < physMemory.getArrayPage().length; i++) {
+            TablePageRecord tablePageRecord = tablePage.getRecord(physMemory.getArrayPage()[i].getId());
+            classes.get(classify(tablePageRecord)).add(tablePageRecord);
+        }
+        TablePageRecord tpr = makeTpr(classes, numNewPage);
+
+        tablePage.getRecord(numNewPage).setPresence(true);
+        tablePage.getRecord(numNewPage).setIdPhysMemory(tpr.getIdPhisMemory());
+        tablePage.getRecord(numNewPage).setRecours(true);
+        tpr.setIdSwap(swap.add(tpr.getPage()));
+        tpr.setPresence(false);
+        tpr.setIdPhysMemory(-1);
+    }
+
+    private TablePageRecord makeTpr(ArrayList<ArrayList<TablePageRecord>> classes, int numNewPage){
+        TablePageRecord tpr = null;
+        for (int i=0;i<4;i++) {
+            if (!classes.get(i).isEmpty()) {
+                tpr = tablePage.getRecord(classes.get(i).get(0).getPage().getId());
+            }
+        }
+        if (tpr != null && tpr.getIdSwap() != -1) {
+            physMemory.addPage(tpr.getIdPhisMemory(), swap.getPage(tpr.getIdSwap()));
+        } else {
+            physMemory.addPage(tpr.getIdPhisMemory(), tablePage.getRecord(numNewPage).getPage());
+        }
+        return tpr;
     }
 }

@@ -9,16 +9,19 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Main {
-    private JFrame frame;
+    public JFrame frame;
     private DiskPanel diskPanel;
     private JTree tree;
+
+    private JTextField dixkSize;
+    private JTextField bloackSize;
 
     private Disk disk;
     private File selectedFile;
     private Directory selectedDirectory;
 
-    public Main() {
-        this.disk = new Disk(2048, 4);
+    public Main(int diskSize, int blockSize) {
+        this.disk = new Disk(diskSize, blockSize);
 
         this.frame = new JFrame();
         this.frame.setSize(1280, 720);
@@ -222,8 +225,10 @@ public class Main {
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
-                Main window = new Main();
-                window.frame.setVisible(true);
+                CreateDisk createDisk = new CreateDisk();
+                createDisk.frame.setVisible(true);
+                //Main main = new Main();
+                //main.frame.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
             }
