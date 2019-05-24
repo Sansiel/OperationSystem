@@ -2,6 +2,7 @@ package laba4_S.Disk.Files;
 
 import laba4_S.Disk.Block;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 public abstract class FileObject {
@@ -9,14 +10,14 @@ public abstract class FileObject {
     private FileObject parent;
 
     private final int size;
-    private Block block;
+    private ArrayList<Block> block;
 
     public FileObject(String name, int size, FileObject parent) {
         this.name = name;
         this.parent = parent;
 
         this.size = size;
-        this.block = null;
+        this.block = new ArrayList<>();
     }
 
     public String getName() {
@@ -40,22 +41,38 @@ public abstract class FileObject {
     }
 
     public Block getBlock() {
+        return block.get(0);
+    }
+    public ArrayList<Block> getBlocks() {
         return block;
     }
 
     public boolean hasBlock(Block findBlock) {
-        Block block = this.getBlock();
-        while (block != null) {
-            if (block.equals(findBlock)) {
-                return true;
-            }
-            block = block.getNextBlock();
-        }
+        if (block.contains(findBlock) && findBlock.getData() == this) return true;
         return false;
+//        Block block = this.getBlock();
+//        while (block != null) {
+//            if (block.equals(findBlock)) {
+//                return true;
+//            }
+//            block = block.getNextBlock();
+//        }
+//        return false;
     }
 
-    public void setBlock(Block block) {
-        this.block = block;
+    public void setDirectoryBlock(Block block) {
+        ArrayList<Block> blocks = new ArrayList<>();
+        blocks.add(block);
+        this.block = blocks;
+    }
+
+    public void addBlock(Block block) {
+        if (this.block == null) this.block = new ArrayList<>();
+        this.block.add(block);
+    }
+
+    public void setBlocks(ArrayList<Block> blocks) {
+        this.block = blocks;
     }
 
     public String getFullName(){

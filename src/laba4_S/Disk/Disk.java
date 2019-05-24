@@ -11,13 +11,15 @@ public class Disk {
     private FAT fat;
     public Directory root;
     private FileObject buffer;
+    private int blockSize;
 
     public Disk(int memorySize, int blockSize) {
         this.fat = new FAT(memorySize, blockSize);
         this.root = new Directory();
         Block block = this.fat.getEmptyBlock();
+        this.blockSize = block.getSize();
         block.setData(this.root);
-        this.root.setBlock(block);
+        this.root.setDirectoryBlock(block);
         this.buffer = null;
     }
 
@@ -47,7 +49,7 @@ public class Disk {
 
         Block block = this.fat.getEmptyBlock();
         block.setData(directory);
-        directory.setBlock(block);
+        directory.setDirectoryBlock(block);
 
         return directory;
     }
@@ -72,29 +74,35 @@ public class Disk {
         File file = new File(name, size, parent);
         parent.addFileObject(file);
 
-        Block block = this.fat.getEmptyBlock();
-        size -= block.getSize();
-        block.setData(file);
-        file.setBlock(block);
-
-        while (size > 0) {
-            Block nextBlock = this.fat.getEmptyBlock();
-            block.setNextBlock(nextBlock);
-
-            block = nextBlock;
-            size -= block.getSize();
+        int blockCount = size / blockSize;
+        if (size % blockSize > 0) blockCount += 1;
+        for (int i = 0; i < blockCount; i++) {
+            Block block = this.fat.getEmptyBlock();
             block.setData(file);
+            file.addBlock(block);
         }
+
+//        while (size > 0) {
+//            Block nextBlock = this.fat.getEmptyBlock();
+//            block.setNextBlock(nextBlock);
+//
+//            block = nextBlock;
+//            size -= block.getSize();
+//            block.setData(file);
+//        }
 
         return file;
     }
 
     public File deleteFile(File file) {
-        Block block = file.getBlock();
-        while (block != null) {
+        for (Block block : file.getBlocks()) {
             block.setData(null);
-            block = block.getNextBlock();
         }
+        file.setBlocks(null);
+//        while (block != null) {
+//            block.setData(null);
+//            block = block.getNextBlock();
+//        }
         file.getParent().deleteFileObject(file);
         return file;
     }
@@ -112,54 +120,54 @@ public class Disk {
         return directory;
     }
 
-    public void copy(FileObject fileObject) {
-        if (fileObject == null) {
-            return;
-        }
-        this.buffer = this.copy(fileObject, null);
-    }
-
-    private FileObject copy(FileObject fileObject, Directory parent) {
-        if (fileObject instanceof File) {
-            File file = (File) fileObject;
-            return new File(file.getName(), file.getSize(), parent);
-        }
-        if (fileObject instanceof Directory) {
-            Directory directory = (Directory) fileObject;
-            Directory copy = new Directory(directory.getName(), parent);
-
-            for (Iterator<FileObject> iterator = directory.getFileObjects(); iterator.hasNext(); ) {
-                copy.addFileObject(this.copy(iterator.next(), copy));
-            }
-            return copy;
-        }
-        return null;
-    }
-
-    public void paste(Directory parent) {
-        if (parent == null || this.buffer == null) {
-            return;
-        }
-        if (!this.fat.hasEnoughSpace(this.buffer.getSize())) {
-            JOptionPane.showMessageDialog(new JFrame(),"No enough place");
-            return;
-        }
-
-        this.paste(this.buffer, parent);
-    }
-
-    private void paste(FileObject fileObject, Directory parent) {
-        if (fileObject instanceof File) {
-            File file = (File) fileObject;
-            this.addFile(parent, file.getName(), file.getSize());
-        }
-        if (fileObject instanceof Directory) {
-            Directory directory = (Directory) fileObject;
-            Directory newDirectory = this.addDirectory(parent, directory.getName());
-
-            for (Iterator<FileObject> iterator = directory.getFileObjects(); iterator.hasNext(); ) {
-                this.paste(iterator.next(), newDirectory);
-            }
-        }
-    }
+//    public void copy(FileObject fileObject) {
+//        if (fileObject == null) {
+//            return;
+//        }
+//        this.buffer = this.copy(fileObject, null);
+//    }
+//
+//    private FileObject copy(FileObject fileObject, Directory parent) {
+//        if (fileObject instanceof File) {
+//            File file = (File) fileObject;
+//            return new File(file.getName(), file.getSize(), parent);
+//        }
+//        if (fileObject instanceof Directory) {
+//            Directory directory = (Directory) fileObject;
+//            Directory copy = new Directory(directory.getName(), parent);
+//
+//            for (Iterator<FileObject> iterator = directory.getFileObjects(); iterator.hasNext(); ) {
+//                copy.addFileObject(this.copy(iterator.next(), copy));
+//            }
+//            return copy;
+//        }
+//        return null;
+//    }
+//
+//    public void paste(Directory parent) {
+//        if (parent == null || this.buffer == null) {
+//            return;
+//        }
+//        if (!this.fat.hasEnoughSpace(this.buffer.getSize())) {
+//            JOptionPane.showMessageDialog(new JFrame(),"No enough place");
+//            return;
+//        }
+//
+//        this.paste(this.buffer, parent);
+//    }
+//
+//    private void paste(FileObject fileObject, Directory parent) {
+//        if (fileObject instanceof File) {
+//            File file = (File) fileObject;
+//            this.addFile(parent, file.getName(), file.getSize());
+//        }
+//        if (fileObject instanceof Directory) {
+//            Directory directory = (Directory) fileObject;
+//            Directory newDirectory = this.addDirectory(parent, directory.getName());
+//
+//            for (Iterator<FileObject> iterator = directory.getFileObjects(); iterator.hasNext(); ) {
+//                this.paste(iterator.next(), newDirectory);
+//            }
+//        }
+//    }
 }

@@ -135,62 +135,62 @@ public class Main {
         gridBagConstraints.gridy = 3;
         leftPanel.add(btnDelete, gridBagConstraints);
 
-        JButton btnCopy = new JButton("Copy");
-        btnCopy.addActionListener(event -> {
-            if (this.selectedFile != null){
-                this.disk.copy(this.selectedFile);
-            }
-            if (this.selectedDirectory != null) {
-                this.disk.copy(this.selectedDirectory);
-            }
-        });
-        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weighty = 1;
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        leftPanel.add(btnCopy, gridBagConstraints);
+//        JButton btnCopy = new JButton("Copy");
+//        btnCopy.addActionListener(event -> {
+//            if (this.selectedFile != null){
+//                this.disk.copy(this.selectedFile);
+//            }
+//            if (this.selectedDirectory != null) {
+//                this.disk.copy(this.selectedDirectory);
+//            }
+//        });
+//        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+//        gridBagConstraints.weighty = 1;
+//        gridBagConstraints.gridx = 0;
+//        gridBagConstraints.gridy = 4;
+//        leftPanel.add(btnCopy, gridBagConstraints);
 
-        JButton btnCut = new JButton("Cut");
-        btnCut.addActionListener(event -> {
-            if (this.selectedFile != null){
-                this.disk.copy(this.selectedFile);
-                this.disk.deleteFile(this.selectedFile);
-                this.selectedFile = null;
-            }
-            if (this.selectedDirectory != null) {
-                this.disk.copy(this.selectedDirectory);
-                this.disk.deleteDirectory(this.selectedDirectory);
-                this.selectedDirectory = null;
-            }
+//        JButton btnCut = new JButton("Cut");
+//        btnCut.addActionListener(event -> {
+//            if (this.selectedFile != null){
+//                this.disk.copy(this.selectedFile);
+//                this.disk.deleteFile(this.selectedFile);
+//                this.selectedFile = null;
+//            }
+//            if (this.selectedDirectory != null) {
+//                this.disk.copy(this.selectedDirectory);
+//                this.disk.deleteDirectory(this.selectedDirectory);
+//                this.selectedDirectory = null;
+//            }
+//
+//            this.updateDisk();
+//            this.updateTree();
+//        });
+//        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+//        gridBagConstraints.weighty = 1;
+//        gridBagConstraints.gridx = 0;
+//        gridBagConstraints.gridy = 5;
+//        leftPanel.add(btnCut, gridBagConstraints);
 
-            this.updateDisk();
-            this.updateTree();
-        });
-        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weighty = 1;
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
-        leftPanel.add(btnCut, gridBagConstraints);
-
-        JButton btnPaste = new JButton("Paste");
-        btnPaste.addActionListener(event -> {
-            Directory parent = this.selectedDirectory;
-            if (parent == null && this.selectedFile != null) {
-                parent = this.selectedFile.getParent();
-            }
-            if (parent == null) {
-                parent = this.disk.root;
-            }
-            this.disk.paste(parent);
-
-            this.updateDisk();
-            this.updateTree();
-        });
-        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weighty = 1;
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
-        leftPanel.add(btnPaste, gridBagConstraints);
+//        JButton btnPaste = new JButton("Paste");
+//        btnPaste.addActionListener(event -> {
+//            Directory parent = this.selectedDirectory;
+//            if (parent == null && this.selectedFile != null) {
+//                parent = this.selectedFile.getParent();
+//            }
+//            if (parent == null) {
+//                parent = this.disk.root;
+//            }
+//            this.disk.paste(parent);
+//
+//            this.updateDisk();
+//            this.updateTree();
+//        });
+//        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+//        gridBagConstraints.weighty = 1;
+//        gridBagConstraints.gridx = 0;
+//        gridBagConstraints.gridy = 6;
+//        leftPanel.add(btnPaste, gridBagConstraints);
 
 
         gridBagConstraints.fill = GridBagConstraints.BOTH;
@@ -227,8 +227,6 @@ public class Main {
             try {
                 CreateDisk createDisk = new CreateDisk();
                 createDisk.frame.setVisible(true);
-                //Main main = new Main();
-                //main.frame.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
             }

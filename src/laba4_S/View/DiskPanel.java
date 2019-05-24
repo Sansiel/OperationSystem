@@ -30,24 +30,26 @@ public class DiskPanel extends JPanel {
 
         FAT fat = this.disk.getFat();
 
-        int blocksCount = 1;
-        while (blocksCount * blocksCount < fat.getBlocksCount()) {
-            blocksCount++;
-        }
-        int blockSide = Math.min(
+        int blocksCount = this.getWidth() / 45;
+//        while (blocksCount * blocksCount < fat.getBlocksCount()) {
+//            blocksCount++;
+//        }
+        int blockSide = 40;
+        /*Math.min(
                 (int)(0.9 * this.getWidth()) / blocksCount,
                 (int)(0.9 * this.getHeight()) / blocksCount
-        );
-        int space = Math.min(
+        );*/
+        int space = 5;
+        /*Math.min(
                 (int)(0.1 * this.getWidth()) / (blocksCount - 1),
                 (int)(0.1 * this.getHeight()) / (blocksCount - 1)
-        );
+        );*/
 
         g.setColor(new Color(255, 255, 255));
         g.drawRect(0, 0, this.getWidth(), this.getHeight());
         for (int w = 0; w < blocksCount; w++) {
             for (int h = 0; h < blocksCount; h++) {
-                int blockID = w * (blocksCount + 1) + h;
+                int blockID = w * blocksCount + h;
                 if (blockID >= fat.getBlocksCount()) {
                     continue;
                 }
@@ -64,13 +66,13 @@ public class DiskPanel extends JPanel {
                 g.setColor(new Color(160, 160, 160));
                 if (block.getData() != null) {
                     if (block.getData() instanceof Directory) {
-                        g.setColor(new Color(67, 180, 44));
+                        g.setColor(new Color(200, 0, 0));
                     }
                     if (block.getData() instanceof File) {
                         g.setColor(new Color(32, 64, 200));
                     }
                     if (isSelected) {
-                        g.setColor(new Color(200, 0, 0));
+                        g.setColor(new Color(67, 180, 44));
                     }
                 }
 

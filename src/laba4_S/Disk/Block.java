@@ -6,13 +6,11 @@ public class Block {
     private final int id;
     private final int size;
     private FileObject data;
-    private Block nextBlock;
 
     public Block(int id, int size) {
         this.id = id;
         this.size = size;
         this.data = null;
-        this.nextBlock = null;
     }
 
     public int getID() {
@@ -33,14 +31,6 @@ public class Block {
 
     public boolean isEmpty() {
         return this.data == null;
-    }
-
-    public Block getNextBlock() {
-        return this.nextBlock;
-    }
-
-    public void setNextBlock(Block nextBlock) {
-        this.nextBlock = nextBlock;
     }
 
     public boolean equals(Block block) {
